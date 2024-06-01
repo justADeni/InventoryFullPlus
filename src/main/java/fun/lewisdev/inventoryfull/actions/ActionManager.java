@@ -1,7 +1,7 @@
 package fun.lewisdev.inventoryfull.actions;
 
 import fun.lewisdev.inventoryfull.actions.impl.*;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 

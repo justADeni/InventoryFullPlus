@@ -24,11 +24,6 @@ package fun.lewisdev.inventoryfull.utils.reflection;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
@@ -43,73 +38,11 @@ import java.util.Objects;
  *
  * @author Crypto Morin
  * @version 2.1.0
- * @see ReflectionUtils
  */
 public final class Titles {
-    /**
-     * EnumTitleAction
-     * Used for the fade in, stay and fade out feature of titles.
-     * Others: ACTIONBAR, RESET
-     */
-    private static final Object TITLE, SUBTITLE, TIMES, CLEAR;
-    private static final MethodHandle PACKET_PLAY_OUT_TITLE;
-    /**
-     * ChatComponentText JSON message builder.
-     */
-    private static final MethodHandle CHAT_COMPONENT_TEXT;
 
-    static {
-        MethodHandle packetCtor = null;
-        MethodHandle chatComp = null;
-
-        Object times = null;
-        Object title = null;
-        Object subtitle = null;
-        Object clear = null;
-
-        if (!ReflectionUtils.supports(11)) {
-            Class<?> chatComponentText = ReflectionUtils.getNMSClass("ChatComponentText");
-            Class<?> packet = ReflectionUtils.getNMSClass("PacketPlayOutTitle");
-            Class<?> titleTypes = packet.getDeclaredClasses()[0];
-
-            for (Object type : titleTypes.getEnumConstants()) {
-                switch (type.toString()) {
-                    case "TIMES":
-                        times = type;
-                        break;
-                    case "TITLE":
-                        title = type;
-                        break;
-                    case "SUBTITLE":
-                        subtitle = type;
-                        break;
-                    case "CLEAR":
-                        clear = type;
-                }
-            }
-
-            MethodHandles.Lookup lookup = MethodHandles.lookup();
-            try {
-                chatComp = lookup.findConstructor(chatComponentText, MethodType.methodType(void.class, String.class));
-
-                packetCtor = lookup.findConstructor(packet,
-                        MethodType.methodType(void.class, titleTypes,
-                                ReflectionUtils.getNMSClass("IChatBaseComponent"), int.class, int.class, int.class));
-            } catch (NoSuchMethodException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-
-        TITLE = title;
-        SUBTITLE = subtitle;
-        TIMES = times;
-        CLEAR = clear;
-
-        PACKET_PLAY_OUT_TITLE = packetCtor;
-        CHAT_COMPONENT_TEXT = chatComp;
+    private Titles() {
     }
-
-    private Titles() {}
 
     /**
      * Sends a title message with title and subtitle to a player.
@@ -120,7 +53,6 @@ public final class Titles {
      * @param fadeOut  the amount of ticks for the title to fade out.
      * @param title    the title message.
      * @param subtitle the subtitle message.
-     *
      * @see #clearTitle(Player)
      * @since 1.0.0
      */
@@ -129,26 +61,8 @@ public final class Titles {
                                  String title, String subtitle) {
         Objects.requireNonNull(player, "Cannot send title to null player");
         if (title == null && subtitle == null) return;
-        if (ReflectionUtils.supports(11)) {
-            player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
-            return;
-        }
 
-        try {
-            Object timesPacket = PACKET_PLAY_OUT_TITLE.invoke(TIMES, CHAT_COMPONENT_TEXT.invoke(title), fadeIn, stay, fadeOut);
-            ReflectionUtils.sendPacket(player, timesPacket);
-
-            if (title != null) {
-                Object titlePacket = PACKET_PLAY_OUT_TITLE.invoke(TITLE, CHAT_COMPONENT_TEXT.invoke(title), fadeIn, stay, fadeOut);
-                ReflectionUtils.sendPacket(player, titlePacket);
-            }
-            if (subtitle != null) {
-                Object subtitlePacket = PACKET_PLAY_OUT_TITLE.invoke(SUBTITLE, CHAT_COMPONENT_TEXT.invoke(subtitle), fadeIn, stay, fadeOut);
-                ReflectionUtils.sendPacket(player, subtitlePacket);
-            }
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-        }
+        player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
     }
 
     /**
@@ -158,7 +72,6 @@ public final class Titles {
      * @param player   the player to send the title to.
      * @param title    the title message.
      * @param subtitle the subtitle message.
-     *
      * @see #sendTitle(Player, int, int, int, String, String)
      * @since 1.0.0
      */
@@ -180,7 +93,6 @@ public final class Titles {
      *
      * @param player the player to send the title to.
      * @param config the configuration section to parse the title properties from.
-     *
      * @since 1.0.0
      */
     public static void sendTitle(Player player, ConfigurationSection config) {
@@ -202,25 +114,11 @@ public final class Titles {
      * Clears the title and subtitle message from the player's screen.
      *
      * @param player the player to clear the title from.
-     *
      * @since 1.0.0
      */
     public static void clearTitle(Player player) {
         Objects.requireNonNull(player, "Cannot clear title from null player");
-        if (ReflectionUtils.supports(11)) {
-            player.resetTitle();
-            return;
-        }
-
-        Object clearPacket;
-        try {
-            clearPacket = PACKET_PLAY_OUT_TITLE.invoke(CLEAR, null, -1, -1, -1);
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-            return;
-        }
-
-        ReflectionUtils.sendPacket(player, clearPacket);
+        player.resetTitle();
     }
 
     /**
@@ -234,7 +132,6 @@ public final class Titles {
      * @param header  the header of the tablist.
      * @param footer  the footer of the tablist.
      * @param players players to send this change to.
-     *
      * @since 1.0.0
      */
     public static void sendTabList(String header, String footer, Player... players) {
@@ -242,33 +139,7 @@ public final class Titles {
         Objects.requireNonNull(header, "Tab title header cannot be null");
         Objects.requireNonNull(footer, "Tab title footer cannot be null");
 
-        if (ReflectionUtils.supports(13)) {
-            // https://hub.spigotmc.org/stash/projects/SPIGOT/repos/bukkit/browse/src/main/java/org/bukkit/entity/Player.java?until=2975358a021fe25d52a8103f7d7aaeceb3abf245&untilPath=src%2Fmain%2Fjava%2Forg%2Fbukkit%2Fentity%2FPlayer.java
-            for (Player player : players) player.setPlayerListHeaderFooter(header, footer);
-            return;
-        }
-
-        try {
-            Class<?> IChatBaseComponent = ReflectionUtils.getNMSClass("network.chat", "IChatBaseComponent");
-            Class<?> PacketPlayOutPlayerListHeaderFooter = ReflectionUtils.getNMSClass("network.protocol.game", "PacketPlayOutPlayerListHeaderFooter");
-
-            Method chatComponentBuilderMethod = IChatBaseComponent.getDeclaredClasses()[0].getMethod("a", String.class);
-            Object tabHeader = chatComponentBuilderMethod.invoke(null, "{\"text\":\"" + header + "\"}");
-            Object tabFooter = chatComponentBuilderMethod.invoke(null, "{\"text\":\"" + footer + "\"}");
-
-            Object packet = PacketPlayOutPlayerListHeaderFooter.getConstructor().newInstance();
-            Field headerField = PacketPlayOutPlayerListHeaderFooter.getDeclaredField("a"); // Changed to "header" in 1.13
-            Field footerField = PacketPlayOutPlayerListHeaderFooter.getDeclaredField("b"); // Changed to "footer" in 1.13
-
-            headerField.setAccessible(true);
-            headerField.set(packet, tabHeader);
-
-            footerField.setAccessible(true);
-            footerField.set(packet, tabFooter);
-
-            for (Player player : players) ReflectionUtils.sendPacket(player, packet);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
+        // https://hub.spigotmc.org/stash/projects/SPIGOT/repos/bukkit/browse/src/main/java/org/bukkit/entity/Player.java?until=2975358a021fe25d52a8103f7d7aaeceb3abf245&untilPath=src%2Fmain%2Fjava%2Forg%2Fbukkit%2Fentity%2FPlayer.java
+        for (Player player : players) player.setPlayerListHeaderFooter(header, footer);
     }
 }

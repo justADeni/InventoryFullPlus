@@ -5,7 +5,6 @@ import fun.lewisdev.inventoryfull.utils.color.patterns.GradientPattern;
 import fun.lewisdev.inventoryfull.utils.color.patterns.Pattern;
 import fun.lewisdev.inventoryfull.utils.color.patterns.RainbowPattern;
 import fun.lewisdev.inventoryfull.utils.color.patterns.SolidPattern;
-import fun.lewisdev.inventoryfull.utils.reflection.ReflectionUtils;
 import net.md_5.bungee.api.ChatColor;
 
 import java.awt.*;
@@ -21,7 +20,7 @@ public class IridiumColorAPI {
      *
      * @since 1.0.0
      */
-    private static final boolean SUPPORTS_RGB = ReflectionUtils.supports(16);
+    private static final boolean SUPPORTS_RGB = true;
 
     private static final List<String> SPECIAL_COLORS = Arrays.asList("&l", "&n", "&o", "&k", "&m");
 

@@ -1,5 +1,5 @@
 name: InventoryFullPlus
-version: @version@
+version: 3.1.1
 authors: [ItsLewizzz]
 description: Notify players when their inventory is full
 
