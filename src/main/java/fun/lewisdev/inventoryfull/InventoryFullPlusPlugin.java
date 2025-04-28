@@ -4,6 +4,7 @@ import fun.lewisdev.inventoryfull.actions.ActionManager;
 import fun.lewisdev.inventoryfull.config.Messages;
 import fun.lewisdev.inventoryfull.hologram.HologramManager;
 import fun.lewisdev.inventoryfull.listeners.DropsToInventoryListener;
+import fun.lewisdev.inventoryfull.listeners.PickupItemListener;
 import fun.lewisdev.inventoryfull.player.PlayerManager;
 import fun.lewisdev.inventoryfull.utils.Metrics;
 import me.mattstudios.mf.base.CommandManager;
@@ -36,6 +37,7 @@ public class InventoryFullPlusPlugin extends JavaPlugin {
         commandManager.register(new InventoryFullCommand(this));
 
         new BlockBreakListener(this);
+        new PickupItemListener(this);
 
         if(getServer().getPluginManager().getPlugin("AutoSell") != null) {
             getLogger().info("Hooked into AutoSell");
